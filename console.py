@@ -46,7 +46,7 @@ class HBNBCommand(cmd.Cmd):
                 new_instance = eval(args + "()")
                 new_instance.save()
                 print(new_instance.id)
-            except NameError:
+            except Exception:
                 print("** class doesn't exist **")
 
     def do_show(self, args):
@@ -55,9 +55,9 @@ class HBNBCommand(cmd.Cmd):
         Usage: show <class name> <id>
         """
         arguments = split(args)
-        if not arguments:
+        if not args:
             print("** class name missing **")
-        elif arguments[0] not in storage.classes():
+        elif arguments[0] not in storage.all():
             print("** class doesn't exist **")
         elif len(arguments) == 1:
             print("** instance id missing **")
@@ -72,9 +72,9 @@ class HBNBCommand(cmd.Cmd):
         Usage: destroy <class name> <id>
         """
         arguments = split(args)
-        if not arguments:
+        if not args:
             print("** class name missing **")
-        elif arguments[0] not in storage.classes():
+        elif arguments[0] not in storage.all():
             print("** class doesn't exist **")
         elif len(arguments) == 1:
             print("** instance id missing **")
@@ -133,7 +133,7 @@ class HBNBCommand(cmd.Cmd):
                     attr_type = type(getattr(instance, attr_name))
                     try:
                         setattr(instance, attr_name, attr_type(attr_value))
-                        storage.save()
+                        instance.save()
                     except (ValueError, TypeError):
                         print("** invalid value **")
                 else:
