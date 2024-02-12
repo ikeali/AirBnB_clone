@@ -1,24 +1,24 @@
 #!/usr/bin/python3
-"""
-Command interpreter for AirBnB project.
-"""
+"""Command interpreter module"""
 
 import cmd
-from models.base_model import BaseModel
+import shlex
 from models import storage
-from shlex import split
+
 
 class HBNBCommand(cmd.Cmd):
     """
-    HBNBCommand class definition for command interpreter.
+    Command interpreter class
     """
     prompt = "(hbnb) "
+
 
     def do_quit(self, args):
         """
         Quit command to exit the program.
         """
         return True
+
 
     def do_EOF(self, args):
         """
@@ -27,15 +27,17 @@ class HBNBCommand(cmd.Cmd):
         print()  # Print a new line before exiting
         return True
 
-    def emptyline(self):
+
+     def emptyline(self):
         """
         Do nothing on an empty line.
         """
         pass
 
+
     def do_create(self, args):
         """
-        Creates a new instance of BaseModel, saves it, and prints the id.
+        Creates a new instance of BaseModel, saves it (to the JSON file) and prints the id.
         Usage: create <class name>
         """
         arguments = shlex.split(args)
@@ -44,10 +46,9 @@ class HBNBCommand(cmd.Cmd):
         elif arguments[0] not in storage.classes():
             print("** class doesn't exist **")
         else:
-            new_instance = storage.classes()[arguments[0]]() 
+            new_instance = storage.classes()[arguments[0]]()
             new_instance.save()
             print(new_instance.id)
-
 
     def do_show(self, args):
         """
@@ -55,6 +56,8 @@ class HBNBCommand(cmd.Cmd):
         Usage: show <class name> <id>
         """
         arguments = shlex.split(args)
+        instances = storage.all()
+
         if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
         elif len(arguments) < 2:
@@ -64,15 +67,15 @@ class HBNBCommand(cmd.Cmd):
         else:
             key = "{}.{}".format(arguments[0], arguments[1])
             print(instances[key])
-    
-    
+
     def do_destroy(self, args):
         """
         Deletes an instance based on the class name and id (save the change into the JSON file).
         Usage: destroy <class name> <id>
-        """        
+        """
         arguments = shlex.split(args)
-        
+        instances = storage.all()
+
         if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
         elif len(arguments) < 2:
@@ -98,7 +101,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
         else:
             print([str(value) for key, value in instances.items() if key.startswith(arguments[0])])
-    
+
     def do_update(self, args):
         """
         Updates an instance based on the class name and id by adding or updating attribute
@@ -135,4 +138,8 @@ class HBNBCommand(cmd.Cmd):
                     print("Invalid value type")
             else:
                 print("Attribute name not found")
+
+
+if __name__ == '__main__':
+    HBNBCommand().cmdloop()
 
