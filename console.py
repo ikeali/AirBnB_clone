@@ -38,56 +38,58 @@ class HBNBCommand(cmd.Cmd):
         Creates a new instance of BaseModel, saves it, and prints the id.
         Usage: create <class name>
         """
-        if not args:
+        arguments = shlex.split(args)
+        if not arguments:
             print("** class name missing **")
+        elif arguments[0] not in storage.classes():
+            print("** class doesn't exist **")
         else:
-            try:
-                new_instance = eval(args + "()")
-                new_instance.save()
-                print(new_instance.id)
-            except Exception:
-                print("** class doesn't exist **")
+            new_instance = storage.classes()[arguments[0]]() 
+            new_instance.save()
+            print(new_instance.id)
+
 
     def do_show(self, args):
         """
         Prints the string representation of an instance based on the class name and id.
         Usage: show <class name> <id>
         """
-        arguments = split(args)
+        arguments = shlex.split(args)
         if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif len(arguments) == 1:
+        elif len(arguments) < 2:
             print("** instance id missing **")
+        elif "{}.{}".format(arguments[0], arguments[1]) not in instances:
+            print("** no instance found **")
         else:
             key = "{}.{}".format(arguments[0], arguments[1])
-            instances = storage.all()
-            print(instances.get(key, "** no instance found **"))
-
+            print(instances[key])
+    
+    
     def do_destroy(self, args):
         """
-        Deletes an instance based on the class name and id.
+        Deletes an instance based on the class name and id (save the change into the JSON file).
         Usage: destroy <class name> <id>
-        """
-        arguments = split(args)
+        """        
+        arguments = shlex.split(args)
+        
         if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif len(arguments) == 1:
+        elif len(arguments) < 2:
             print("** instance id missing **")
+        elif "{}.{}".format(arguments[0], arguments[1]) not in instances:
+            print("** no instance found **")
         else:
             key = "{}.{}".format(arguments[0], arguments[1])
-            instances = storage.all()
-            if key in instances:
-                del instances[key]
-                storage.save()
-            else:
-                print("** no instance found **")
+            del instances[key]
+            storage.save()
 
     def do_all(self, args):
         """
         Prints all string representation of all instances based or not on the class name.
         Usage: all [<class name>]
         """
-        arguments = split(args)
+        arguments = shlex.split(args)
         instances = storage.all()
 
         if not args:
@@ -96,42 +98,41 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
         else:
             print([str(value) for key, value in instances.items() if key.startswith(arguments[0])])
-
+    
     def do_update(self, args):
         """
-        Updates an instance based on the class name and id by adding or updating attribute.
+        Updates an instance based on the class name and id by adding or updating attribute
+        (save the change into the JSON file).
         Usage: update <class name> <id> <attribute name> "<attribute value>"
         """
-        arguments = split(args)
+        arguments = shlex.split(args)
+        instances = storage.all()
 
         if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif len(arguments) == 1:
+        elif len(arguments) < 2:
             print("** instance id missing **")
-        elif len(arguments) == 2:
+        elif "{}.{}".format(arguments[0], arguments[1]) not in instances:
+            print("** no instance found **")
+        elif len(arguments) < 3:
             print("** attribute name missing **")
-        elif len(arguments) == 3:
+        elif len(arguments) < 4:
             print("** value missing **")
+        elif len(arguments) > 4:
+            print("Too many arguments")
         else:
             key = "{}.{}".format(arguments[0], arguments[1])
-            instances = storage.all()
-            if key not in instances:
-                print("** no instance found **")
-            else:
-                instance = instances[key]
-                attr_name = arguments[2]
+            obj = instances[key]
+
+            attr_name = arguments[2]
+            if hasattr(obj, attr_name):
                 attr_value = arguments[3].strip('"')
-
-                if hasattr(instance, attr_name):
-                    attr_type = type(getattr(instance, attr_name))
-                    try:
-                        setattr(instance, attr_name, attr_type(attr_value))
-                        instance.save()
-                    except (ValueError, TypeError):
-                        print("** invalid value **")
-                else:
-                    print("** attribute doesn't exist **")
-
-if __name__ == '__main__':
-    HBNBCommand().cmdloop()
+                try:
+                    attr_type = type(getattr(obj, attr_name))
+                    setattr(obj, attr_name, attr_type(attr_value))
+                    obj.save()
+                except Exception:
+                    print("Invalid value type")
+            else:
+                print("Attribute name not found")
 
