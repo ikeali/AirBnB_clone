@@ -7,7 +7,6 @@ import cmd
 from models.base_model import BaseModel
 from models import storage
 from shlex import split
-from datetime import datetime
 
 class HBNBCommand(cmd.Cmd):
     """
@@ -55,10 +54,8 @@ class HBNBCommand(cmd.Cmd):
         Usage: show <class name> <id>
         """
         arguments = split(args)
-        if not args:
+        if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif arguments[0] not in storage.all():
-            print("** class doesn't exist **")
         elif len(arguments) == 1:
             print("** instance id missing **")
         else:
@@ -72,10 +69,8 @@ class HBNBCommand(cmd.Cmd):
         Usage: destroy <class name> <id>
         """
         arguments = split(args)
-        if not args:
+        if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif arguments[0] not in storage.all():
-            print("** class doesn't exist **")
         elif len(arguments) == 1:
             print("** instance id missing **")
         else:
@@ -109,10 +104,8 @@ class HBNBCommand(cmd.Cmd):
         """
         arguments = split(args)
 
-        if not args:
+        if not arguments or arguments[0] not in storage.classes():
             print("** class name missing **")
-        elif arguments[0] not in storage.classes():
-            print("** class doesn't exist **")
         elif len(arguments) == 1:
             print("** instance id missing **")
         elif len(arguments) == 2:
