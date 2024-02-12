@@ -1,10 +1,7 @@
-#!/usr/bin/python3
-"""
-This module contains the BaseModel class.
-"""
-
-import uuid
+# models/base_model.py
 from datetime import datetime
+import uuid
+from models import storage  # Import the storage variable
 
 class BaseModel:
     """
@@ -29,6 +26,7 @@ class BaseModel:
         else:
             self.id = str(uuid.uuid4())
             self.created_at = self.updated_at = datetime.now()
+            storage.new(self)  # Call new method on storage for new instances
 
     def __str__(self):
         """
@@ -41,9 +39,11 @@ class BaseModel:
 
     def save(self):
         """
-        Updates the public instance attribute updated_at with the current datetime.
+        Updates the public instance attribute updated_at with the current datetime
+        and calls save(self) method of storage.
         """
         self.updated_at = datetime.now()
+        storage.save()
 
     def to_dict(self):
         """
@@ -57,11 +57,3 @@ class BaseModel:
         instance_dict['created_at'] = self.created_at.isoformat()
         instance_dict['updated_at'] = self.updated_at.isoformat()
         return instance_dict
-
-# Example usage
-if __name__ == "__main__":
-    my_object = BaseModel()
-    print(my_object)
-    my_object.save()
-    print(my_object.to_dict())
-
