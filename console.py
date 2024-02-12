@@ -100,38 +100,32 @@ class HBNBCommand(cmd.Cmd):
 
     def do_update(self, args):
         """
-        Updates an instance based on the class name and id by adding or updating attribute.
+        Updates an instance based on the class name and id by adding or updating attribute
+        (save the change into the JSON file).
         Usage: update <class name> <id> <attribute name> "<attribute value>"
         """
-        arguments = split(args)
-
-        if not arguments or arguments[0] not in storage.classes():
+        arguments = args.split()
+        if not arguments:
             print("** class name missing **")
-        elif len(arguments) == 1:
+        elif arguments[0] not in storage.classes():
+            print("** class doesn't exist **")
+        elif len(arguments) < 2:
             print("** instance id missing **")
-        elif len(arguments) == 2:
-            print("** attribute name missing **")
-        elif len(arguments) == 3:
-            print("** value missing **")
         else:
             key = "{}.{}".format(arguments[0], arguments[1])
-            instances = storage.all()
-            if key not in instances:
+            if key not in storage.all():
                 print("** no instance found **")
+            elif len(arguments) < 3:
+                print("** attribute name missing **")
+            elif len(arguments) < 4:
+                print("** value missing **")
             else:
-                instance = instances[key]
-                attr_name = arguments[2]
-                attr_value = arguments[3].strip('"')
+                obj = storage.all()[key]
+                attribute_name = arguments[2]
+                attribute_value = arguments[3].strip('"')
+                setattr(obj, attribute_name, attribute_value)
+                obj.save()
 
-                if hasattr(instance, attr_name):
-                    attr_type = type(getattr(instance, attr_name))
-                    try:
-                        setattr(instance, attr_name, attr_type(attr_value))
-                        instance.save()
-                    except (ValueError, TypeError):
-                        print("** invalid value **")
-                else:
-                    print("** attribute doesn't exist **")
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
